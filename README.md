@@ -6,7 +6,7 @@ It includes the complete workflow for estimating drug resistance prevalence, gen
 
 **Repository Contents:**
 - `/Data`: Processed data files as input files.
-- `/Analysis`: Scripts for calculating drug resistance prevalence and performing inverse probability weighting.
+- `/Analysis`: Scripts for running SeekDeep, performing inverse probability weighting, and calculating drug resistance prevalence .
 - `/Visuals`: Scripts for summarizing data and generating figures.
 
 **Additional bioinformatics pipeline:**
