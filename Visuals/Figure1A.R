@@ -65,7 +65,7 @@ ggplot() +
     size = 3,
     label.size = 0.2
   ) +
-  scale_size_continuous(name = "Number of samples") +
+  scale_size_continuous(name = "Number of participants") +
   scale_color_manual(name = "Region",
                      values = c('#1b9e77','#d95f02','#a6761d','#e7298a',
                                 '#66a61e','#e6ab02','#7570b3','black',

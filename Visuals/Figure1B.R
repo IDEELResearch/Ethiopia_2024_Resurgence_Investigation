@@ -21,7 +21,9 @@ library(survey)
 # intervals using survey weights.
 
 # Read genotype data
-geno <- read.csv("Data/DRgenotypes.csv")
+geno <- read.csv("Data/DRgenotypes.csv") %>% 
+  # Matching case on metadata
+  mutate(Sample_ID = toupper(Sample_ID))
 
 # Read sample weights
 wts <- read.csv("Data/metadata_all_with_ipw.csv") %>% 
