@@ -10,7 +10,7 @@ It includes the complete workflow for estimating drug resistance prevalence, gen
 - `/Visuals`: Scripts for summarizing data and generating figures.
 
 **Additional bioinformatics pipeline:**
-- Primary processing: Pfsmarrter amplicon sequencing data were processed using [SeekDeep] (https://github.com/bailey-lab/seekdeep_illumina_snakemake) to ensure high-quality variant calling.
+- Primary processing: Pfsmarrter amplicon sequencing data were processed using [SeekDeep](https://github.com/bailey-lab/seekdeep_illumina_snakemake) to ensure high-quality variant calling.
 - Variant conversion: Output files were converted using the [haplotype_variant_calling](https://github.com/bailey-lab/haplotype_variant_calling) pipeline into:
   - Amino acid tables: For antimalarial drug resistance marker prevalence.
   - VCF files: For downstream population genetic analyses.
