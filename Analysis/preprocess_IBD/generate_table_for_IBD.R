@@ -9,7 +9,8 @@ rm(list = ls())
 pacman::p_unload(pacman::p_loaded(), character.only = TRUE)
 
 # Setting up working directory
-setwd("/Users/isabelagyuricza/OneDrive - University of North Carolina at Chapel Hill/IDEEL_PhD")
+setwd("Ethiopia_2024_Resurgence_Investigation_repo") 
+# Update to your local path
 
 # Loading libraries needed
 library(tidyverse)
@@ -143,5 +144,4 @@ aa_snp_matrix <- aa_freq_mapped %>%
   )
 
 # Saving output
-#write_csv(aa_freq_mapped, "AAChangesInfo_with_genome_positions.csv")
 write_csv(aa_snp_matrix, "Data/AA_frequency_genomic_SNP_matrix.csv")
