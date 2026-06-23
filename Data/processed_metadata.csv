@@ -207,9 +207,9 @@
 "AMAN031027","Amhara","Bahirdar Zuria","ANDASA H/CENTER",16,"Female"
 "AMAN031028","Amhara","Bahirdar Zuria","ANDASA H/CENTER",33,"Female"
 "AMAN031029","Amhara","Bahirdar Zuria","ANDASA H/CENTER",19,"Male"
-"AMAN031016","Amhara","Bahirdar Zuria","ANDASA H/CENTER",20,"Male"
+"AMAN031016","Amhara","Bahirdar Zuria","ANDASA H/CENTER",20,NA
 "AMAN031015","Amhara","Bahirdar Zuria","ANDASA H/CENTER",15,"Male"
-"AMAN031014","Amhara","Bahirdar Zuria","ANDASA H/CENTER",12,"Male"
+"AMAN031014","Amhara","Bahirdar Zuria","ANDASA H/CENTER",12,NA
 "AMAN031013","Amhara","Bahirdar Zuria","ANDASA H/CENTER",32,"Female"
 "AMAN031012","Amhara","Bahirdar Zuria","ANDASA H/CENTER",18,"Male"
 "AMAN031011","Amhara","Bahirdar Zuria","ANDASA H/CENTER",15,"Male"
@@ -230,7 +230,7 @@
 "AMAN030996","Amhara","Bahirdar Zuria","ANDASA H/CENTER",35,"Female"
 "AMAN030995","Amhara","Bahirdar Zuria","ANDASA H/CENTER",45,"Male"
 "AMAN030994","Amhara","Bahirdar Zuria","ANDASA H/CENTER",48,"Male"
-"AMAN030993","Amhara","Bahirdar Zuria","ANDASA H/CENTER",30,"Male"
+"AMAN030993","Amhara","Bahirdar Zuria","ANDASA H/CENTER",30,NA
 "AMAN030992","Amhara","Bahirdar Zuria","ANDASA H/CENTER",18,"Female"
 "AMAN030991","Amhara","Bahirdar Zuria","ANDASA H/CENTER",20,"Male"
 "AMAN030990","Amhara","Bahirdar Zuria","ANDASA H/CENTER",21,"Male"
@@ -241,7 +241,7 @@
 "AMAN030985","Amhara","Bahirdar Zuria","ANDASA H/CENTER",27,"Male"
 "AMAN030984","Amhara","Bahirdar Zuria","ANDASA H/CENTER",15,"Male"
 "AMAN030963","Amhara","Bahirdar Zuria","ANDASA H/CENTER",20,"Male"
-"AMAN030964","Amhara","Bahirdar Zuria","ANDASA H/CENTER",18,"Male"
+"AMAN030964","Amhara","Bahirdar Zuria","ANDASA H/CENTER",18,NA
 "AMAN030965","Amhara","Bahirdar Zuria","ANDASA H/CENTER",30,"Female"
 "AMAN030966","Amhara","Bahirdar Zuria","ANDASA H/CENTER",35,"Male"
 "AMAN030967","Amhara","Bahirdar Zuria","ANDASA H/CENTER",5,"Male"
@@ -485,7 +485,7 @@
 "SEBI1517","SNNP","Mirab Abaya","BIRBIRR H/CENTER",20,"Female"
 "SEBI1518","SNNP","Mirab Abaya","BIRBIRR H/CENTER",11,"Male"
 "SEBI1519","SNNP","Mirab Abaya","BIRBIRR H/CENTER",15,"Female"
-"SEBI1520","SNNP","Mirab Abaya","BIRBIRR H/CENTER",17,"Female"
+"SEBI1520","SNNP","Mirab Abaya","BIRBIRR H/CENTER",17,NA
 "SEBI1521","SNNP","Mirab Abaya","BIRBIRR H/CENTER",3,"Female"
 "SEBI1522","SNNP","Mirab Abaya","BIRBIRR H/CENTER",19,"Female"
 "SEBI1523","SNNP","Mirab Abaya","BIRBIRR H/CENTER",18,"Female"
@@ -515,7 +515,7 @@
 "SEBI1547","SNNP","Mirab Abaya","BIRBIRR H/CENTER",9,"Female"
 "SEBI1548","SNNP","Mirab Abaya","BIRBIRR H/CENTER",10,"Female"
 "SEBI1549","SNNP","Mirab Abaya","BIRBIRR H/CENTER",8,"Male"
-"SEBI1550","SNNP","Mirab Abaya","BIRBIRR H/CENTER",18,"Female"
+"SEBI1550","SNNP","Mirab Abaya","BIRBIRR H/CENTER",18,NA
 "SEBI1551","SNNP","Mirab Abaya","BIRBIRR H/CENTER",10,"Male"
 "SEBI1552","SNNP","Mirab Abaya","BIRBIRR H/CENTER",12,"Female"
 "SEBI1553","SNNP","Mirab Abaya","BIRBIRR H/CENTER",6,"Male"
@@ -538,8 +538,8 @@
 "SEBI1570","SNNP","Mirab Abaya","BIRBIRR H/CENTER",13,"Male"
 "SEBI1571","SNNP","Mirab Abaya","BIRBIRR H/CENTER",20,"Male"
 "SEBI1572","SNNP","Mirab Abaya","BIRBIRR H/CENTER",17,"Male"
-"SEBI1573","SNNP","Mirab Abaya","BIRBIRR H/CENTER",15,"Female"
-"SEBI1574","SNNP","Mirab Abaya","BIRBIRR H/CENTER",8,"Female"
+"SEBI1573","SNNP","Mirab Abaya","BIRBIRR H/CENTER",15,NA
+"SEBI1574","SNNP","Mirab Abaya","BIRBIRR H/CENTER",8,NA
 "SEBI1575","SNNP","Mirab Abaya","BIRBIRR H/CENTER",21,"Female"
 "SEBI1576","SNNP","Mirab Abaya","BIRBIRR H/CENTER",8,"Female"
 "SEBI1577","SNNP","Mirab Abaya","BIRBIRR H/CENTER",18,"Female"
@@ -1639,7 +1639,7 @@
 "GAAB2306","Gambela","Gog","ABOL H/CENTER",22,"Male"
 "GAAB2305","Gambela","Gog","ABOL H/CENTER",21,"Female"
 "GAAB2304","Gambela","Gog","ABOL H/CENTER",10,"Female"
-"GAAB2303","Gambela","Gog","ABOL H/CENTER",10,"Male"
+"GAAB2303","Gambela","Gog","ABOL H/CENTER",10,NA
 "GAAB2302","Gambela","Gog","ABOL H/CENTER",5,"Male"
 "GAAB2301","Gambela","Gog","ABOL H/CENTER",8,"Female"
 "GAAB0274","Gambela","Gog","ABOL H/CENTER",22,NA

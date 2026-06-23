@@ -3,7 +3,7 @@
 ################################################################################
 
 # Isabela Gerdes Gyuricza - Parr Lab
-# 6/01/2026
+# 6/23/2026
 
 # Cleaning up workspace
 rm(list = ls())
@@ -97,44 +97,8 @@ geno_summary <- svyby(
                  "artemisinin")
     ))
 
-# geno_summary_2 <- geno %>%
-#   # mutate(Region = case_when(Region == "DIRE DAWA" ~ "Dire Dawa",
-#   #                           Region == "TIGRAY" ~ "Tigray",
-#   #                           Region == "AMHARA" ~ "Amhara",
-#   #                           Region == "AFAR" ~ "Afar",
-#   #                           Region == "S_ETHIOPIA" ~ "SNNP",
-#   #                           Region == "SIDAMA" ~ "Sidama",
-#   #                           Region == "GAMBELA" ~ "Gambela")) %>%
-#   pivot_longer(cols = -c(study_id, Region),
-#                names_to = "Mutation",
-#                values_to = "Prevalence") %>%
-#   filter(!is.na(Prevalence)) %>%
-#   # We don't care about mixed infections here, so changing to MUTANT (1) and
-#   # wild-type (0)
-#   mutate(Prevalence = ifelse(Prevalence > 0, 1, 0)) %>%
-#   group_by(Mutation) %>%
-#   summarise(
-#     n = n(),
-#     x = sum(Prevalence),  # sum of proportions approximates total number of
-#     #mutation-carrying samples
-#     mean_prevalence = x/n,
-#     se = sqrt((mean_prevalence * (1 - mean_prevalence)) / n),
-#     ci_low = mean_prevalence - 1.96 * se,
-#     ci_high = mean_prevalence + 1.96 * se
-#   ) %>%
-#   ungroup() %>%
-#   mutate(Drug = case_when(
-#     grepl("dhps",Mutation) ~ "sulfadoxine",
-#     grepl("mdr1",Mutation) ~ "lumefantrine",
-#     grepl("crt",Mutation) ~ "chloroquine",
-#     grepl("dhfr",Mutation) ~ "pyrimethamine",
-#     grepl("k13",Mutation) ~ "artemisinin"))  %>%
-#   mutate(Drug = factor(Drug, levels = c("lumefantrine",
-#                                         "pyrimethamine",
-#                                         "sulfadoxine",
-#                                         "chloroquine",
-#                                         "artemisinin"))) %>%
-#   mutate(Mutation = paste0("pf",Mutation))
+# Saving summary for all mutations
+write_csv(geno_summary, file = "Results/all_drug_prevalence_summary.csv")
 
 # Define the desired prefix order
 prefix_order <- c("pfmdr1", "pfdhfr", "pfdhps", "pfcrt", "pfk13")
@@ -174,20 +138,7 @@ dev.off()
 
 
 # Only looking at IPW-weighted k13 622I prevalence by region.
-
 Mut_long <- geno %>% 
-  mutate(
-    Region = case_when(
-      Region == "DIRE DAWA" ~ "Dire Dawa",
-      Region == "TIGRAY" ~ "Tigray",
-      Region == "AMHARA" ~ "Amhara",
-      Region == "AFAR" ~ "Afar",
-      Region == "S_ETHIOPIA" ~ "SNNP",
-      Region == "SIDAMA" ~ "Sidama",
-      Region == "GAMBELA" ~ "Gambela",
-      TRUE ~ Region
-    )
-  ) %>%
   pivot_longer(
     cols = -c(Sample_ID, Region, ipw),
     names_to = "Mutation",
@@ -236,6 +187,9 @@ Mut_summary <- svyby(
   ) %>% 
   select(Region, n, x, mean_prevalence, se, ci_low, ci_high)
 
+# Saving 622I prevalence
+write_csv(Mut_summary, file = "Results/R622I_prevalence_summary.csv")
+
 # Plotting only 622I by region
 pdf("622I_prevalence.pdf", width = 5, height = 3)
 
@@ -255,23 +209,9 @@ Mut_summary %>%
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# Mut_summary %>% 
-#   ggplot(aes(x = Region, y = mean_prevalence)) +
-#   geom_bar(fill = "#F2300F", 
-#            stat = "identity", 
-#            alpha = 0.6) +
-#   geom_errorbar(aes(ymin = ci_low, ymax = ci_high), 
-#                 width = 0.2, 
-#                 size = 0.4, 
-#                 color = "gray20") +
-#   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-#   labs(x = "Region", y = "Frequency (±95% CI)") +
-#   theme_minimal() +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
 dev.off()
 
-# Gathering some numbers 
+# Gathering the number of samples with each mutation 
 geno_number <- geno %>% 
   pivot_longer(-c(Sample_ID, Region, -ipw), names_to = "Mutation",
                values_to = "Proportion") %>% 

@@ -19,32 +19,37 @@ library(tidygraph)
 library(ggraph)
 
 # Loading IBD results
-ibd <- read.csv("Data/ibd_outbreakSamples_final.csv")
-
+ibd <- read.csv("Data/ibd_output_parameters.csv") %>% 
+  select(iid1, iid2, ibd1) %>% 
+  rename(p1 = iid1,
+         p2 = iid2)
+  
 annot <- read_csv("Data/processed_metadata.csv")
 
 # Including 622I genotype information
 geno <- read_csv("Data/DRgenotypes.csv") %>% 
   select(Sample_ID, pfk13_622I) %>% 
+  mutate(Sample_ID = toupper(Sample_ID)) %>% 
   mutate(`pfk13_622I genotype` = ifelse(pfk13_622I > 0, "Mutant",
                              ifelse(pfk13_622I == 0, "Wildtype",
                                     NA))) %>% 
-  select(Sample_ID, `pfk13_622I genotype`)
+  select(Sample_ID, `pfk13_622I genotype`) %>% 
+  filter(!is.na(`pfk13_622I genotype`)) 
 
 annot <- annot %>% 
-  left_join(geno)
+  inner_join(geno, by = c("Barcode" = "Sample_ID"))
 
 # Now, let's focus on these clones (IBD >= 0.9)
 ibd_90 <- ibd %>% 
-  filter(ibd1 >= 0.9)
+  filter(ibd1 >= 0.9) %>% 
+  filter(p1 %in% annot$Barcode & p2 %in% annot$Barcode)
 
 graph <- as_tbl_graph(ibd_90, directed = FALSE)
 
 graph_c <- graph %>%
   activate(nodes) %>%
-  left_join(annot, 
-             by = c("name" = "Sample_ID")) %>% 
-  filter(!is.na(`pfk13_622I genotype`))
+  inner_join(annot, 
+             by = c("name" = "Barcode"))
 
 pdf("09_IBD_MLE_network_by_region.pdf", width = 8, height = 6)
 
@@ -62,7 +67,7 @@ ggraph(graph_c,layout='igraph',
   scale_color_manual(name = "Region",
                      values = c('#1b9e77','#d95f02','#e7298a',
                                 '#7570b3','black',
-                                "blue")) + 
+                                "blue")) +
   theme_void() +
   theme(plot.title = element_text(hjust = 0.5, size = 15))
 

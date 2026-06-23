@@ -18,7 +18,7 @@ library(tidyverse)
 
 # Read metadata
 metadata <- read.csv("Data/OB_Metadata_final.csv") %>%
-  select(Barcode, Age, Sex, Regions, Woreda, Sentinel.site.name) %>% 
+  select(Barcode, Age, Sex, Regions, Woreda, Sentinel.site.name, Travel_Pre_Mon) %>% 
   rename(Region = Regions,
          Sentinel_Site = Sentinel.site.name) %>% 
   mutate(Region = case_when(Region %in% c("DIREDAWA","DIRE DAWA") ~ "Dire Dawa",
@@ -33,6 +33,13 @@ metadata <- read.csv("Data/OB_Metadata_final.csv") %>%
                             Region %in% c("SIDAMA","Sidama ") ~ "Sidama",
                             Region == "GAMBELA" ~ "Gambela",
                             .default = Region))
+
+# How many participants reported travel?
+metadata %>%  
+  count(Travel_Pre_Mon, name = "n") %>% 
+  mutate(
+    proportion = n / sum(n)
+  )
 
 # Loading district information from shape file
 district_info <- read.csv("Data/district_info.csv") 

@@ -1,7 +1,7 @@
 ################################################################################
 # Pfsmarrt: Plasmodium falciparum Amplicon Data analysis
 # Script by: Abebe A. Fola
-# Date: 05/13/2026
+# Date: 06/23/2026
 # Description: This script processes AA fraction data, merges with metadata, 
 #              performs COI (Complexity of Infection) analysis and Identity By Descent (IBD) estimation using 
 #              isoRelate,
@@ -25,7 +25,9 @@ library(McCOILR)
 # Load AA fraction data (from SeekDeep output)
 # Ref: https://github.com/bailey-lab/seekdeep_illumina_snakemake
 
-df_raw <- read.csv("Data/amino_acid_fracs.csv", check.names = FALSE)
+df_raw <- read.table("Data/samp_amino_acid_fracs.tsv", 
+                     sep = "\t", 
+                     header = TRUE)
 
 # Define target drug resistance loci mapping
 # Format: "New_Name" = "Original_Name"
@@ -61,19 +63,34 @@ write.csv(df_dr, "Data/DRgenotypes.csv", row.names = FALSE)
 # Use these data for down stream prevalence estimation and visualization
 
 # --- 4. COI Estimation (THE REAL McCOIL) ---
-# Prepare data for McCOIL categorical tool. Only use diversity markers and dont 
-# included drug resistance
-data_mccoil_raw <- read.table("Data/COIFROMATED05.txt", fileEncoding = "UTF-16",
-                              header = TRUE)
-# generated from AA tables 
+# Loading aminoacid data with information about ref and alt
+aa_file <- read_tsv("Data/renamed_AAChangesInfo.tsv")
 
-# Apply 0.5 threshold for mixed calls
-data_mccoil_formatted <- data_mccoil_raw %>%
-  mutate(across(-1, ~ ifelse(. > 0 & . < 1, 0.5, .)))
+aa_file_freq <- aa_file %>%
+  select(sample, CoveredBy, reference_AA_pos, alternate_AA, alternate_AA_freq, coverage_AA_cnt) %>%
+  filter(grepl("heome|ama1", CoveredBy)) %>% # Keeping only heome and ama1 for COI 
+  unite("aa_tmp", reference_AA_pos, alternate_AA, sep = "", remove = TRUE) %>%
+  unite("aa", CoveredBy, aa_tmp, sep = "_", remove = TRUE) %>%
+  # Formatting column with position + aminoacid name
+  mutate(
+    alternate_AA_freq = case_when(
+      coverage_AA_cnt == 0 ~ -1, # positions that are not covered are missing data
+      alternate_AA_freq > 0 & alternate_AA_freq < 1 ~ 0.5, # freq between 0-1 are heterozygous
+      TRUE ~ alternate_AA_freq # the rest remains the same
+    )
+  ) %>% 
+  select(-coverage_AA_cnt)
 
-# Transforming column into samples names
-data_mccoil_formatted <- data_mccoil_formatted %>% 
-  column_to_rownames("Sample_ID")
+# Making sure the classes of the dataframe are correct for coi
+aa_file_coi <- aa_file_freq %>%
+  pivot_wider(names_from = aa, values_from = alternate_AA_freq) %>%
+  mutate(across(-sample, ~replace_na(., -1))) %>%
+  mutate(across(-sample, as.numeric)) %>%
+  as.data.frame()
+
+# Removing sample column and transforming into rownames
+aa_file_coi_final = aa_file_coi[,-1]
+rownames(aa_file_coi_final) = aa_file_coi[,1]
 
 # Run McCOIL Categorical
 # Note: Ensure a 'COI' directory exists for the output path
@@ -81,7 +98,7 @@ if(!dir.exists("COI")) dir.create("COI")
 
 set.seed(2024)
 out_cat <- McCOIL_categorical(
-  data_mccoil_formatted, 
+  aa_file_coi_final, 
   maxCOI = 25, 
   threshold_ind = 20, 
   threshold_site = 20,
@@ -97,43 +114,55 @@ out_cat <- McCOIL_categorical(
 
 # --- 5. IBD Analysis  ---
 #  Data Preprocessing & isoRelate Formatting ---
-# load data
-barcode_raw <- read_csv("Data/ibd_formated1.csv")
 
-# Replace NA and values < 1 with 0, only for numeric columns
-barcode_clean <- barcode_raw %>%
-  mutate(across(where(is.numeric), ~ ifelse(is.na(.) | . < 1, 0, .)))
+# Loading amino acid frequency matrix formatted as samples by SNPs
+barcode_clean <- read_csv("Data/AA_frequency_genomic_SNP_matrix.csv", 
+                          show_col_types = FALSE) %>% 
+  mutate(sample = toupper(sample))
 
-col_names <- colnames(barcode_clean)
-chr <- NULL
-pos <- NULL
+# Converting amino acid frequencies to allele calls (presence/absence)
+barcode_clean <- barcode_clean %>%
+  mutate(
+    across(
+      where(is.numeric),
+      ~ case_when(
+        is.na(.) ~ -1,
+        . < 1 ~ 0,
+        TRUE ~ 1
+      )
+    )
+  )
 
-# Extract chr and position from SNP column names
-for (i in 2:length(col_names)) {
-  col_name_i <- unlist(strsplit(col_names[i], ":"))
-  chr <- c(chr, col_name_i[1])
-  pos <- c(pos, as.numeric(col_name_i[2]))
-}
+# Extracting chromosome and position from SNP column names
+snp_info <- tibble(
+  snp_id = colnames(barcode_clean)[-1],
+  chr = str_extract(snp_id, "^[^:]+"),
+  pos_bp = as.numeric(str_extract(snp_id, "(?<=:)\\d+"))
+) %>%
+  arrange(chr, pos_bp)
 
-rm(i, col_name_i)
+# Reordering SNP columns to match map order
+barcode_clean <- barcode_clean %>%
+  select(1, all_of(snp_info$snp_id))
 
-# Recombination rate: 1 event per 18,000 bp
+# Creating map file for isoRelate
 recomb_rate <- 18000
 
-# Create map file
-my_map <- data.frame(
-  chr = chr,
-  snp_id = col_names[2:length(col_names)],
-  pos_cM = pos / recomb_rate,
-  pos_bp = pos,
-  stringsAsFactors = FALSE
-)
+my_map <- snp_info %>%
+  mutate(
+    pos_cM = pos_bp / recomb_rate,
+    chr = as.character(chr),
+    snp_id = as.character(snp_id),
+    pos_cM = as.numeric(pos_cM),
+    pos_bp = as.numeric(pos_bp)
+  ) %>%
+  select(chr, snp_id, pos_cM, pos_bp) %>%
+  as.data.frame(stringsAsFactors = FALSE)
 
-rm(chr, col_names, pos, recomb_rate)
-
-# Convert first two columns to character (for PLINK format compliance)
-my_map$chr <- as.character(my_map$chr)
-my_map$snp_id <- as.character(my_map$snp_id)
+# Creating genotype matrix
+geno_matrix <- barcode_clean %>%
+  select(-1) %>%
+  as.matrix()
 
 # Create PED matrix: nrow = samples, ncol = 2*number of SNPs + 6 pedigree columns
 my_ped <- matrix(nrow = nrow(barcode_clean), ncol = 2 * (ncol(barcode_clean) - 1) + 6)
@@ -146,8 +175,10 @@ for (i in 1:nrow(barcode_clean)) {
 rm(i)
 
 # Replace values for PLINK-style encoding
-my_ped[my_ped == 0] <- 2  # Treat "0" as alternate allele
+my_ped[my_ped == 1] <- 3   # Temporary alternate
+my_ped[my_ped == 0] <- 2   # Reference
 my_ped[my_ped == -1] <- 0  # Missing
+my_ped[my_ped == 3] <- 1   # Alternate
 
 # Add pedigree columns
 my_ped[, 1] <- barcode_clean[[1]]  # Family ID
@@ -159,11 +190,6 @@ my_ped[, 6] <- -9 # Phenotype
 
 # Turn into a ibd_final frame if desired
 my_ped <- as.data.frame(my_ped, stringsAsFactors = FALSE)
-
-# Preview outputs
-head(my_map)
-head(my_ped[, 1:10])
-
 
 # change ped and map to ibd_final frames
 my_ped <- data.frame(my_ped)
@@ -184,28 +210,23 @@ barcode_clean_pedmap <- list(my_ped, my_map)
 
 rm(my_ped, my_map)
 
-# lets look at the ibd_final
-str(barcode_clean_pedmap)
+# Running isoRelate genotype formatting
+eth_genotypes <- getGenotypes(
+  ped.map = barcode_clean_pedmap,
+  reference.ped.map = NULL,
+  maf = 0.0000,
+  isolate.max.missing = 0.5,
+  snp.max.missing = 0.5,
+  chromosomes = NULL,
+  input.map.distance = "cM",
+  reference.map.distance = "cM"
+)
 
-eth_genotypes <- getGenotypes(ped.map = barcode_clean_pedmap,
-                              reference.ped.map = NULL,
-                              maf = 0.0000,
-                              isolate.max.missing = 0.0000, # save all samples
-                              snp.max.missing = 0.0000, # save all loci
-                              chromosomes = NULL,
-                              input.map.distance = "M",
-                              reference.map.distance = "cM")
+# Estimating IBD parameters
+eth_parameters <- getIBDparameters(
+  ped.genotypes = eth_genotypes,
+  number.cores = 4
+)
 
-# estimate ibd1 parameters
-eth_parameters <- getIBDparameters(ped.genotypes = eth_genotypes,
-                                   number.cores = 4)
-
-# Saving data for plotting
-eth_parameters <- eth_parameters %>% 
-  select(iid1, iid2, ibd1) %>% 
-  rename(p1 = iid1, 
-         p2 = iid2)
-
-write.csv(eth_parameters, "Data/ibd_outbreakSamples_final.csv", 
-          row.names = FALSE)
-# this output used for  Visualizing IBD Distributions and Relatedness network 
+# Saving IBD parameter output
+write_csv(eth_parameters, "Data/ibd_output_parameters.csv")

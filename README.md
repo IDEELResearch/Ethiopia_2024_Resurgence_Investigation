@@ -8,6 +8,7 @@ It includes the complete workflow for estimating drug resistance prevalence, gen
 - `/Data`: Processed data files as input files.
 - `/Analysis`: Scripts for running SeekDeep, performing inverse probability weighting, and calculating drug resistance prevalence.
 - `/Visuals`: Scripts for summarizing data and generating figures.
+- `/Results`: Output tables from figures.
 
 **Additional bioinformatics pipeline:**
 - Primary processing: Pfsmarrter amplicon sequencing data were processed using [SeekDeep](https://github.com/bailey-lab/seekdeep_illumina_snakemake) to ensure high-quality variant calling.

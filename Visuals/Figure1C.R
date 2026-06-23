@@ -3,7 +3,7 @@
 ################################################################################
 
 # Isabela Gerdes Gyuricza - Parr Lab
-# 6/01/2026
+# 6/23/2026
 
 # Cleaning up workspace
 rm(list = ls())
@@ -82,20 +82,7 @@ deletion_summary <- map_dfr(genotype_levels, function(g) {
   )
 })
 
-# deletion_summary <- deletion %>%
-#   filter(!is.na(Genotype)) %>%
-#   group_by(Genotype) %>%
-#   summarise(
-#     x = n()
-#   ) %>%
-#   ungroup() %>%
-#   mutate(
-#     n = sum(x),
-#     proportion = x / n,
-#     se = sqrt((proportion * (1 - proportion)) / n),
-#     ci_low = proportion - 1.96 * se,
-#     ci_high = proportion + 1.96 * se
-#   )
+write_csv(deletion_summary, file = "Results/deletion_prevalence_summary.csv")
 
 # Plotting
 pdf("deletion_prevalence.pdf", width = 4, height = 3)
