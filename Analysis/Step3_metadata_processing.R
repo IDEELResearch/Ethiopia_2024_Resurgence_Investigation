@@ -16,7 +16,7 @@ setwd("Ethiopia_2024_Resurgence_Investigation_repo")
 # Load libraries
 library(tidyverse)
 
-metadata <- read.csv("Data/OB_Metadata_final.csv") %>% 
+metadata <- read_csv("Data/OB_Metadata_final.csv") %>% 
   rename(Region = Regions,
          Sentinel_Site = Sentinel.site.name) %>% 
   mutate(Region = case_when(Region %in% c("DIREDAWA","DIRE DAWA") ~ "Dire Dawa",
@@ -41,8 +41,8 @@ metadata_combined <- metadata %>%
                               Sentinel_Site %in% c("Sheraro h/c","Sheraro Health Center") ~ "Sheraro town",
                               Sentinel_Site == "Gara Riketa h/c" ~ "Hawassa Zuria",
                               Sentinel_Site == "Dila Health Center" ~ "Dila town",
-                              Sentinel_Site == "Worer Health Center" ~ "Ambira",
-                              Sentinel_Site == "Woreta Health Center" ~ "Woreta",
+                              Sentinel_Site %in% c("Woreta Health Center", "WORETA H/CENTER") ~ "Woreta town",
+                              Sentinel_Site %in% c("Worer Health Center", "WORER H/CENTER") ~ "Amibara",
                               .default = District)) %>%
   mutate(Sex = ifelse(Sex == 1, "Male","Female")) %>% 
   select(Barcode, Region, District, Sentinel_Site, Age, Sex)
