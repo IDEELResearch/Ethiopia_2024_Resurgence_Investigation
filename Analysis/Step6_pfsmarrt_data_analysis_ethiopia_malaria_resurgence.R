@@ -62,6 +62,7 @@ df_dr[, -1] <- round(df_dr[, -1], 2)
 write.csv(df_dr, "Data/DRgenotypes.csv", row.names = FALSE) 
 # Use these data for down stream prevalence estimation and visualization
 
+rm(list = ls())
 # --- 4. COI Estimation (THE REAL McCOIL) ---
 # Loading aminoacid data with information about ref and alt
 aa_file <- read_tsv("Data/renamed_AAChangesInfo.tsv")
@@ -94,7 +95,7 @@ rownames(aa_file_coi_final) = aa_file_coi[,1]
 
 # Run McCOIL Categorical
 # Note: Ensure a 'COI' directory exists for the output path
-if(!dir.exists("COI")) dir.create("COI")
+if(!dir.exists("Results/COI")) dir.create("Results/COI")
 
 set.seed(2024)
 out_cat <- McCOIL_categorical(
@@ -108,10 +109,56 @@ out_cat <- McCOIL_categorical(
   e1 = 0.05, 
   e2 = 0.05,
   err_method = 3,
-  path = "COI", 
+  path = "Results/COI", 
   output = "Overall_COI.tsv"
 )
 
+coi <- read.table("Results/COI/Overall_COI.tsv_summary.txt", 
+                  header = TRUE)
+
+# Rounding McCOIL posterior median estimates to integer COI values
+coi <- coi %>%
+  filter(CorP == "C") %>% 
+  mutate(COI = round(median))
+
+# Summarizing COI values
+coi_summary <- coi %>%
+  count(COI, name = "n") %>%
+  arrange(COI)
+
+# Calculating monoclonal and polyclonal proportions
+n_total <- sum(coi_summary$n)
+mono_pct <- sum(coi_summary$n[coi_summary$COI == 1]) / n_total * 100
+poly_pct <- 100 - mono_pct
+
+# Plotting COI distribution
+# ggplot(coi_summary,
+#        aes(x = factor(COI),
+#            y = n,
+#            fill = ifelse(COI == 1, "Monoclonal", "Polyclonal"))) +
+#   geom_col(width = 0.9) +
+#   scale_fill_manual(
+#     values = c("Monoclonal" = "black",
+#                "Polyclonal" = "darkgrey"),
+#     labels = c(
+#       paste0("Monoclonal (", round(mono_pct, 1), "%)"),
+#       paste0("Polyclonal (", round(poly_pct, 1), "%)")
+#     ),
+#     name = NULL
+#   ) +
+#   labs(
+#     x = "Complexity of Infection (COI)",
+#     y = "Number of Samples"
+#   ) +
+#   theme_bw() +
+#   theme(
+#     axis.title = element_text(face = "bold", size = 16),
+#     axis.text = element_text(size = 13),
+#     legend.position = "top",
+#     legend.text = element_text(size = 14)
+#   )
+
+rm(list = ls())
 # --- 5. IBD Analysis  ---
 #  Data Preprocessing & isoRelate Formatting ---
 

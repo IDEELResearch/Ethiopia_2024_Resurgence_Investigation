@@ -20,13 +20,12 @@ library(tidyverse)
 # Loading processed metadata
 metadata  <- read.csv("Data/processed_metadata.csv") 
 
-# Read the shapefile to have the background of Ethiopia map with the boundaries by regions.
-eth_map_background <- st_read("Data/eth_adm_csa_bofedb_2021_shp/eth_admbnda_adm1_csa_bofedb_2021.shp") 
-
-districts <- st_read("Data/eth_adm_csa_bofedb_2021_shp/eth_admbnda_adm3_csa_bofedb_2021.shp") 
+districts <- st_read("Data/Ethiopia_shape_files/Ethiopia_Buffere.shp") 
 
 districts_joined <- districts %>%
   right_join(metadata, by = c("ADM3_EN" = "District")) %>% 
+  # There are two samples that don't have information about District, removing them..
+  filter(!is.na(ADM3_EN)) %>% 
   group_by(Region, ADM3_EN) %>%
   summarise(n = n(), .groups = "drop") %>%
   mutate(
@@ -41,35 +40,60 @@ districts_coords <- districts_joined %>%
     lat = st_coordinates(.)[,2]
   )
 
-region_labels <- eth_map_background %>%
+# Getting one label position per ADM1 region from the ADM3 shapefile
+region_labels <- districts %>%
+  group_by(ADM1_EN) %>%
+  summarise(geometry = st_union(geometry), .groups = "drop") %>%
   st_centroid() %>%
-  cbind(st_coordinates(.)) %>% 
-  # Only labeling the regions of interest
-  mutate(ADM1_EN = case_when(ADM1_EN == "Addis Ababa" ~ NA,
-                             ADM1_EN == "Harari" ~ NA,
-                             ADM1_EN == "Somali" ~ NA,
-                             .default = ADM1_EN))
+  mutate(
+    lon = st_coordinates(.)[,1],
+    lat = st_coordinates(.)[,2],
+    ADM1_EN = case_when(
+      ADM1_EN %in% c("Addis Ababa", "Harari", "Somali", "SNNP") ~ NA_character_,
+      TRUE ~ ADM1_EN
+    )
+  ) %>%
+  filter(!is.na(ADM1_EN))
 
-# Plotting
+# Creating region-level background from ADM3 shapefile
+eth_map_background <- districts %>%
+  group_by(ADM1_EN) %>%
+  summarise(geometry = st_union(geometry), .groups = "drop")
+
+# Plotting map
 pdf("sample_region_number.pdf", width = 6, height = 6)
 
 ggplot() +
-  geom_sf(data = eth_map_background, fill = "lightgrey", color = "grey33") +
-  geom_point(data = districts_coords,
-             aes(x = lon, y = lat, size = n, color = Region)) +
+  geom_sf(data = eth_map_background, fill = "lightgrey", color = "grey33", linewidth = 0.3) +
+  geom_point(
+    data = districts_coords,
+    aes(x = lon, y = lat, size = n, color = Region)
+  ) +
   geom_label(
     data = region_labels,
-    aes(x = X, y = Y, label = ADM1_EN),
+    aes(x = lon, y = lat, label = ADM1_EN),
     fill = "white",
     color = "black",
     size = 3,
-    label.size = 0.2
+    linewidth = 0.2
   ) +
-  scale_size_continuous(name = "Number of participants") +
-  scale_color_manual(name = "Region",
-                     values = c('#1b9e77','#d95f02','#a6761d','#e7298a',
-                                '#66a61e','#e6ab02','#7570b3','black',
-                                "red3","blue")) + 
+   scale_size_continuous(name = "Number of participants") +
+  scale_color_manual(
+    name = "Region",
+    values = c(
+      "Afar" = "#1b9e77",
+      "Amhara" = "#d95f02",
+      "Benishangul Gumz" = "#a6761d",
+      "Central Ethiopia" = "#7570b3",
+      "Dire Dawa" = "blue",
+      "Gambela" = "#e6ab02",
+      "Oromia" = "red3",
+      "Sidama" = "black",
+      "South Ethiopia" = "#e7298a",
+      "South West Ethiopia" = "#fdc086",
+      "Tigray" = "#66a61e"
+    )
+  ) +
   theme_minimal() +
   coord_sf() +
   theme(

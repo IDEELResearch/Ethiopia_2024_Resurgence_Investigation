@@ -70,6 +70,9 @@ geno_summary <- svyby(
     ci_low = ci_l,
     ci_high = ci_u
   ) %>% 
+  mutate(
+    ci_low = pmax(ci_low, 0)
+  ) %>% 
   left_join(
     geno_long %>% 
       group_by(Mutation) %>% 
@@ -129,8 +132,9 @@ geno_summary %>%
                 width = 0.2, 
                 size = 0.4, 
                 color = "gray20") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(x = "Mutation", y = "Frequency (CI)") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                     limits = c(0, 1)) +
+  labs(x = "Mutation", y = "Prevalence (CI)") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -170,10 +174,13 @@ Mut_summary <- svyby(
   as.data.frame() %>% 
   as_tibble() %>% 
   rename(
-    mean_prevalence = Prevalence,
+    weighted_prevalence = Prevalence,
     se = se,
     ci_low = ci_l,
     ci_high = ci_u
+  ) %>% 
+  mutate(
+    ci_low = pmax(ci_low, 0)
   ) %>% 
   left_join(
     Mut_long %>% 
@@ -185,7 +192,7 @@ Mut_summary <- svyby(
       ),
     by = "Region"
   ) %>% 
-  select(Region, n, x, mean_prevalence, se, ci_low, ci_high)
+  select(Region, n, x, weighted_prevalence, se, ci_low, ci_high)
 
 # Saving 622I prevalence
 write_csv(Mut_summary, file = "Results/R622I_prevalence_summary.csv")
@@ -194,18 +201,32 @@ write_csv(Mut_summary, file = "Results/R622I_prevalence_summary.csv")
 pdf("622I_prevalence.pdf", width = 5, height = 3)
 
 Mut_summary %>% 
-  ggplot(aes(x = Region, y = mean_prevalence)) +
+  ggplot(aes(x = Region, y = weighted_prevalence)) +
   geom_bar(aes(fill = Region), 
            stat = "identity", 
            alpha = 0.6) +
   geom_errorbar(aes(ymin = ci_low, ymax = ci_high), 
                 width = 0.2, 
                 size = 0.4) +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  scale_fill_manual(name = "Region",
-                     values = c('#1b9e77','#d95f02','#e7298a','#66a61e',
-                                '#7570b3','black',"blue")) + 
-  labs(x = "Region", y = "Frequency (CI)") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                     limits = c(0, 1)) +
+  scale_fill_manual(
+    name = "Region",
+    values = c(
+      "Afar" = "#1b9e77",
+      "Amhara" = "#d95f02",
+      "Benishangul Gumz" = "#a6761d",
+      "Central Ethiopia" = "#7570b3",
+      "Dire Dawa" = "blue",
+      "Gambela" = "#e6ab02",
+      "Oromia" = "red3",
+      "Sidama" = "black",
+      "South Ethiopia" = "#e7298a",
+      "South West Ethiopia" = "#fdc086",
+      "Tigray" = "#66a61e"
+    )
+  ) +
+  labs(x = "Region", y = "Prevalence (CI)") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 

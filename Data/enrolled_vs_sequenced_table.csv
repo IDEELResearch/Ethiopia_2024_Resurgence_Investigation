@@ -1,0 +1,19 @@
+Variable,All enrolled,Sequenced,p-value
+"__Age, median (IQR)__","20 (13, 28)","22 (16, 30)",0.002
+Missing,21,4,NA
+__Sex__,NA,NA,0.2
+Female,924 (43.7%),172 (47.0%),NA
+Male,"1,189 (56.3%)",194 (53.0%),NA
+Missing,91,2,NA
+__Region__,NA,NA,<0.001
+Afar,131 (5.9%),23 (6.3%),NA
+Amhara,673 (30.5%),124 (33.7%),NA
+Benishangul Gumz,190 (8.6%),0 (0.0%),NA
+Central Ethiopia,85 (3.9%),0 (0.0%),NA
+Dire Dawa,51 (2.3%),28 (7.6%),NA
+Gambela,37 (1.7%),12 (3.3%),NA
+Oromia,189 (8.6%),0 (0.0%),NA
+Sidama,68 (3.1%),22 (6.0%),NA
+South Ethiopia,133 (6.0%),116 (31.5%),NA
+South West Ethiopia,197 (8.9%),0 (0.0%),NA
+Tigray,450 (20.4%),43 (11.7%),NA

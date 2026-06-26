@@ -1,9 +1,9 @@
-################################################################################
+#################################################################################
 ##############E###### Processing and cleaning metadata  ########################
 ################################################################################
 
 # Isabela Gerdes Gyuricza - Parr Lab
-# 6/01/2026
+# 6/25/2026
 
 # Cleaning up workspace
 rm(list = ls())
@@ -16,30 +16,21 @@ setwd("Ethiopia_2024_Resurgence_Investigation_repo")
 # Load libraries
 library(tidyverse)
 
-# Read metadata
-metadata <- read.csv("Data/OB_Metadata_final.csv") %>%
-  select(Barcode, Age, Sex, Regions, Woreda, Sentinel.site.name, Travel_Pre_Mon) %>% 
+metadata <- read.csv("Data/OB_Metadata_final.csv") %>% 
   rename(Region = Regions,
          Sentinel_Site = Sentinel.site.name) %>% 
   mutate(Region = case_when(Region %in% c("DIREDAWA","DIRE DAWA") ~ "Dire Dawa",
                             Region == "B/G/R/S" ~ "Benishangul Gumz",
                             Region == "TIGRAY" ~ "Tigray",
                             Region == "AMHARA" ~ "Amhara",
-                            Region == "C/ETHIOPIA" ~ "SNNP",
+                            Region == "C/ETHIOPIA" ~ "Central Ethiopia",
                             Region == "AFAR" ~ "Afar",
                             Region == "OROMIA" ~ "Oromia",
                             Region == "S/WEST" ~ "South West Ethiopia",
-                            Region %in% c("S/ETHIOPIA","S/ETHIOIA","S/ETHIOIPA","S/ETH") ~ "SNNP",
+                            Region %in% c("S/ETHIOPIA","S/ETHIOIA","S/ETHIOIPA","S/ETH") ~ "South Ethiopia",
                             Region %in% c("SIDAMA","Sidama ") ~ "Sidama",
                             Region == "GAMBELA" ~ "Gambela",
                             .default = Region))
-
-# How many participants reported travel?
-metadata %>%  
-  count(Travel_Pre_Mon, name = "n") %>% 
-  mutate(
-    proportion = n / sum(n)
-  )
 
 # Loading district information from shape file
 district_info <- read.csv("Data/district_info.csv") 

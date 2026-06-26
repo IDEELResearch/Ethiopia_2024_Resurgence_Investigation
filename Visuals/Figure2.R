@@ -36,6 +36,17 @@ geno <- read_csv("Data/DRgenotypes.csv") %>%
   select(Sample_ID, `pfk13_622I genotype`) %>% 
   filter(!is.na(`pfk13_622I genotype`)) 
 
+del <- read.csv("Data/processed_deletion_results.csv") %>% 
+  mutate(`pfhrp2/3 genotype` = ifelse(is.na(Genotype), "Undetermined",
+                                      ifelse(Genotype != "pfhrp2-/3-", "Other", Genotype))) %>%
+  mutate(`pfhrp2/3 genotype` = factor(`pfhrp2/3 genotype`, levels = c("pfhrp2-/3-",
+                                                                      "Other",
+                                                                      "Undetermined"))) %>% 
+  select(Sample_ID, `pfhrp2/3 genotype`)
+
+geno <- geno %>% 
+  left_join(del)
+
 annot <- annot %>% 
   inner_join(geno, by = c("Barcode" = "Sample_ID"))
 
@@ -64,10 +75,22 @@ ggraph(graph_c,layout='igraph',
                   position = position_jitter(width = 0.1,
                                              height = 0.1,
                                              seed = 1)) +
-  scale_color_manual(name = "Region",
-                     values = c('#1b9e77','#d95f02','#e7298a',
-                                '#7570b3','black',
-                                "blue")) +
+  scale_color_manual(
+    name = "Region",
+    values = c(
+      "Afar" = "#1b9e77",
+      "Amhara" = "#d95f02",
+      "Benishangul Gumz" = "#a6761d",
+      "Central Ethiopia" = "#7570b3",
+      "Dire Dawa" = "blue",
+      "Gambela" = "#e6ab02",
+      "Oromia" = "red3",
+      "Sidama" = "black",
+      "South Ethiopia" = "#e7298a",
+      "South West Ethiopia" = "#fdc086",
+      "Tigray" = "#66a61e"
+    )
+  ) +
   theme_void() +
   theme(plot.title = element_text(hjust = 0.5, size = 15))
 
@@ -87,6 +110,25 @@ ggraph(graph_c,layout='igraph',
                                              height = 0.1,
                                              seed = 1)) +
   scale_color_manual(values = c("#F2300F","black")) + 
+  theme_void() +
+  theme(plot.title = element_text(hjust = 0.5, size = 15))
+
+dev.off()
+
+pdf("09_IBD_MLE_network_by_double_deletion.pdf", width = 8, height = 6)
+
+set.seed(1)
+ggraph(graph_c,layout='igraph',
+       algorithm ='fr') +
+  geom_edge_link(color = "grey") +
+  geom_node_point(aes(color = `pfhrp2/3 genotype`),
+                  size = 4,
+                  alpha = 0.6,
+                  show.legend = TRUE,
+                  position = position_jitter(width = 0.1,
+                                             height = 0.1,
+                                             seed = 1)) +
+  scale_color_manual(values = c("#F2300F","black","grey")) + 
   theme_void() +
   theme(plot.title = element_text(hjust = 0.5, size = 15))
 
