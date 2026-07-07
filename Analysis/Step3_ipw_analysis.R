@@ -129,7 +129,7 @@ table_enrolled_sequenced <- tbl_merge(
     p.value ~ "p-value"
   ) %>% 
   modify_fmt_fun(
-    p.value ~ gtsummary::style_pvalue
+    p.value ~ function(x) gtsummary::style_pvalue(x, digits = 2)
   ) %>% 
   bold_labels()
 

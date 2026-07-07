@@ -1,7 +1,7 @@
 Variable,All enrolled,Sequenced,p-value
 "__Age, median (IQR)__","20 (13, 28)","22 (16, 30)",0.002
 Missing,21,4,NA
-__Sex__,NA,NA,0.2
+__Sex__,NA,NA,0.18
 Female,924 (43.7%),172 (47.0%),NA
 Male,"1,189 (56.3%)",194 (53.0%),NA
 Missing,91,2,NA
